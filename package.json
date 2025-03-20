@@ -1,6 +1,6 @@
 {
-  "name": "vue-scan",
-  "version": "0.0.1",
+  "name": "@vue-scan/monorepo",
+  "version": "0.0.0",
   "description": "",
   "author": "@Razz21",
   "license": "MIT",
@@ -18,7 +18,8 @@
     "lint-staged": "^15.5.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.2",
-    "vite-plugin-dts": "^4.5.3"
+    "vite-plugin-dts": "^4.5.3",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "engines": {
     "node": ">=22.13.0"
