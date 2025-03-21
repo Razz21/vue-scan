@@ -1,5 +1,6 @@
 name: Publish Develop to Pkg-Pr-New
 on:
+  workflow_dispatch:
   push:
     paths:
       - "packages/**"
@@ -42,6 +43,6 @@ jobs:
           NODE_ENV: production
 
       - name: Publish NPM Package to pkg-pr-new
-        run: pnpx pkg-pr-new publish ./packages/scan
+        run: pnpm dlx pkg-pr-new publish ./packages/scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
