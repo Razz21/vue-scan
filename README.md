@@ -15,7 +15,7 @@ The tool leverages Vue's internal mechanisms to track component lifecycle events
 
 ## Demo
 
-<video controls src="media/demo.mp4" title="Live Demo"></video>
+https://github.com/user-attachments/assets/021e0d70-d7e3-447e-943d-788e9a0f37ce
 
 ## Usage
 
