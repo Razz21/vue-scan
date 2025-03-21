@@ -9,7 +9,8 @@
     "build:packages": "pnpm --filter \"./packages/*\" build",
     "lint": "biome ci .",
     "lint:fix": "biome lint --apply .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:examples": "pnpm --filter \"./examples/*\" dev"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -26,13 +27,13 @@
   },
   "packageManager": "pnpm@10.6.1",
   "lint-staged": {
-    "*.{js,cjs,mjs,ts,tsx}": [
-      "biome lint --apply --no-errors-on-unmatched"
-    ]
+    "*.{js,cjs,mjs,ts,tsx}": ["biome lint --apply --no-errors-on-unmatched"]
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome"
-    ]
+    "onlyBuiltDependencies": ["@biomejs/biome"]
+  },
+  "stackblitz": {
+    "installDependencies": true,
+    "startCommand": "pnpm build:packages"
   }
 }
