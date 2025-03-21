@@ -15,12 +15,7 @@ The tool leverages Vue's internal mechanisms to track component lifecycle events
 
 ## Demo
 
-<div align="center">
-  <video controls style="max-width: 100%; height: auto;">
-    <source src="./media/demo.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</div>
+<video controls src="media/demo.mp4" title="Live Demo"></video>
 
 ## Usage
 
