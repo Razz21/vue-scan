@@ -1,14 +1,30 @@
 {
   "name": "vue-scan",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "type": "module",
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "description": "Vue 3 scan",
+  "keywords": ["vue", "vue3", "vue-scan"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Razz21/vue-scan.git"
+  },
+  "main": "./dist/index.min.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.min.js"
+    }
+  },
+  "files": ["dist"],
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build"
   },
   "devDependencies": {
+    "vite-plugin-dts": "^4.5.3",
     "vue": "*"
   },
   "peerDependencies": {
