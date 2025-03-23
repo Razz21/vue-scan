@@ -5,7 +5,7 @@ import App from './App.vue';
 
 const app = createApp(App);
 app.use(VueScanPlugin, {
-  logToConsole: true,
+  // options
 });
 
 app.mount('#app');
