@@ -1,11 +1,15 @@
 {
   "name": "@razz21/vue-scan",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "author": "Razz21",
   "license": "MIT",
   "description": "Vue 3 scan",
-  "keywords": ["vue", "vue3", "vue-scan"],
+  "keywords": [
+    "vue",
+    "vue3",
+    "vue-scan"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Razz21/vue-scan.git"
@@ -16,7 +20,9 @@
   "main": "./dist/index.min.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
