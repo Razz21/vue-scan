@@ -1,5 +1,5 @@
 {
-  "name": "scan",
+  "name": "vue-spa-example",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "vue": "^3.5.13",
-    "vue-scan": "workspace:*"
+    "@razz21/vue-scan": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.15",

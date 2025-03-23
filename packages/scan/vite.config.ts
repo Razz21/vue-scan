@@ -18,5 +18,13 @@ export default defineConfig({
       name: 'VueScan',
       fileName: (format) => `index.${format === 'es' ? 'js' : 'min.js'}`,
     },
+    rollupOptions: {
+      external: ['vue'],
+      output: {
+        globals: {
+          vue: 'Vue',
+        },
+      },
+    },
   },
 });

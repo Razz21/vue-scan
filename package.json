@@ -7,13 +7,16 @@
   "keywords": [],
   "scripts": {
     "build:packages": "pnpm --filter \"./packages/*\" build",
+    "changeset": "changeset",
     "lint": "biome ci .",
     "lint:fix": "biome lint --apply .",
     "prepare": "husky",
-    "dev:examples": "pnpm --filter \"./examples/*\" dev"
+    "dev:examples": "pnpm --filter \"./examples/*\" dev",
+    "dev:packages": "pnpm --filter \"./packages/*\" dev"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "^2.28.1",
     "@types/node": "^22.13.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
