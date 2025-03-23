@@ -4,7 +4,7 @@
 
 `Vue-scan` is a lightweight utility tool that may help you to identify bottlenecks in your Vue application by tracking and visualising component renders and re-renders with minimal performance impact.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/Razz21/vue-scan/tree/main?file=README.md)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/Razz21/vue-scan/tree/main/examples/vue-spa)
 
 ## Why?
 
