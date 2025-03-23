@@ -4,8 +4,17 @@
   "type": "module",
   "author": "Razz21",
   "license": "MIT",
-  "description": "Vue 3 scan",
-  "keywords": ["vue", "vue3", "vue-scan"],
+  "description": "Track and visualize Vue 3 component renders",
+  "keywords": [
+    "vue",
+    "vue3",
+    "vue-scan",
+    "development",
+    "performance",
+    "debug",
+    "debugging",
+    "components"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Razz21/vue-scan.git"
