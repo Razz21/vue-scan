@@ -1,11 +1,11 @@
+import { cleanupCanvas, initializeCanvas } from '@/canvas';
+import { DevToolsHooks, defaultOptions } from '@/core/constants';
 import { createDevToolsHook } from '@/core/hook';
+import { componentStore } from '@/core/store';
+import type { Options } from '@/core/types';
+import { getComponentName } from '@/core/utils';
+import { logger } from '@/utils/logger';
 import { type Plugin, getCurrentInstance, nextTick } from 'vue';
-import { cleanupCanvas, initializeCanvas } from '../canvas';
-import { DevToolsHooks, defaultOptions } from '../core/constants';
-import { componentStore } from '../core/store';
-import type { Options } from '../core/types';
-import { getComponentName } from '../core/utils';
-import { logger } from '../utils/logger';
 
 // -----------------------------------
 

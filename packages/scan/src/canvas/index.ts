@@ -1,5 +1,5 @@
-import { componentStore } from '../core/store';
-import type { Options } from '../core/types';
+import { componentStore } from '@/core/store';
+import type { Options } from '@/core/types';
 
 let canvasContainer: HTMLElement | null = null;
 let canvas: HTMLCanvasElement | null = null;
