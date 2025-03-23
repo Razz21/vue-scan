@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/021e0d70-d7e3-447e-943d-788e9a0f37ce
 ### Vue 3 Plugin
 
 ```ts
-import { VueScanPlugin } from 'vue-scan';
+import { VueScanPlugin } from '@razz21/vue-scan';
 
 const app = createApp(App);
 app.use(VueScanPlugin, {
@@ -44,15 +44,13 @@ app.mount('#app');
 | `includeComponents` | `string[]` | `[]`                       | If provided, only track components with these names |
 
 ## FAQ
-1. *Is it production-ready?*
 
-Not yet. The project is in the early stages of development and is not yet suitable for production use.
 
-2. *Will it support production mode?*
+1. *Does it support production mode?*
 
-Currently, `vue-scan` is designed for development mode only. However, I may plan to explore production mode support in the future.
+Currently, `vue-scan` is designed for development build only. However, I may plan to explore production build support in the future.
 
-1. *What are supported Vue versions?*
+2. *What are supported Vue versions?*
 
 This tool is built and tested using Vue v3.5.13+. Some features may not work with older versions.
 
