@@ -1,4 +1,14 @@
-# vue-scan [WIP] 🚀
+
+<p align="center" style="padding: 16px;">
+  <img src=".github/assets/logo.webp" alt="Vue-scan logo" width="200">
+</p>
+
+# vue-scan
+
+![GitHub Release](https://img.shields.io/github/v/release/Razz21/vue-scan)
+![GitHub License](https://img.shields.io/github/license/Razz21/vue-scan)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Razz21/vue-scan/ci.yml)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/Razz21/vue-scan)
 
 ## What?
 
@@ -16,6 +26,13 @@ The tool leverages Vue's internal mechanisms to track component lifecycle events
 ## Demo
 
 https://github.com/user-attachments/assets/021e0d70-d7e3-447e-943d-788e9a0f37ce
+
+
+## Installation
+
+```bash
+npm install @razz21/vue-scan
+```
 
 ## Usage
 
@@ -45,8 +62,7 @@ app.mount('#app');
 
 ## FAQ
 
-
-1. *Does it support production mode?*
+1. *Does `vue-scan` support production mode?*
 
 Currently, `vue-scan` is designed for development build only. However, I may plan to explore production build support in the future.
 
