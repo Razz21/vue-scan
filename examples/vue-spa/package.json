@@ -9,14 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.13",
-    "@razz21/vue-scan": "workspace:*"
+    "@razz21/vue-scan": "*",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.15",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
-    "tailwindcss": "^4.0.0",
+    "autoprefixer": "^10.4.21",
+    "install": "^0.13.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
     "typescript": "~5.7.2",
     "vite": "^6.2.0",
     "vue-tsc": "^2.2.4"
