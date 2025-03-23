@@ -1,12 +1,15 @@
+import { createDevToolsHook } from '@/core/hook';
 import { type App, type Plugin, getCurrentInstance, nextTick } from 'vue';
 import { cleanupCanvas, initializeCanvas } from '../canvas';
 import { DevToolsHooks, defaultOptions } from '../core/constants';
 import { componentStore } from '../core/store';
-import type { HookHandler, Options } from '../core/types';
+import type { Options } from '../core/types';
 import { getComponentName } from '../core/utils';
 import { logger } from '../utils/logger';
 
 // -----------------------------------
+
+createDevToolsHook();
 
 const VueScanPlugin: Plugin<Options> = {
   install(app: App, customOptions: Options) {
@@ -20,21 +23,21 @@ const VueScanPlugin: Plugin<Options> = {
     }
     const hook = window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
 
-    hook.on<HookHandler>(DevToolsHooks.COMPONENT_ADDED, (_app, _uid, _parentUid, component) => {
+    hook.on(DevToolsHooks.COMPONENT_ADDED, (_app, _uid, _parentUid, component) => {
       componentStore.markActive(component);
       if (options.logToConsole) {
         logger.log('COMPONENT_ADDED', getComponentName(component));
       }
     });
 
-    hook.on<HookHandler>(DevToolsHooks.COMPONENT_UPDATED, (_app, _uid, _parentUid, component) => {
+    hook.on(DevToolsHooks.COMPONENT_UPDATED, (_app, _uid, _parentUid, component) => {
       componentStore.markActive(component);
       if (options.logToConsole) {
         logger.log('COMPONENT_UPDATED', getComponentName(component));
       }
     });
 
-    hook.on<HookHandler>(DevToolsHooks.COMPONENT_REMOVED, (_app, uid, _parentUid, component) => {
+    hook.on(DevToolsHooks.COMPONENT_REMOVED, (_app, uid, _parentUid, component) => {
       /*
        * This hook may not be called at all. Fallbacking to mixin -> beforeUnmount()
        */
@@ -44,7 +47,7 @@ const VueScanPlugin: Plugin<Options> = {
       }
     });
 
-    hook.on<HookHandler>(DevToolsHooks.APP_UNMOUNT, (_app, _uid, _parentUid, _component) => {
+    hook.on(DevToolsHooks.APP_UNMOUNT, (_app) => {
       if (options.logToConsole) logger.log('APP_UNMOUNT');
     });
 
