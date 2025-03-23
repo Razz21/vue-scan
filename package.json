@@ -10,7 +10,8 @@
     "lint": "biome ci .",
     "lint:fix": "biome lint --apply .",
     "prepare": "husky",
-    "dev:examples": "pnpm --filter \"./examples/*\" dev"
+    "dev:examples": "pnpm --filter \"./examples/*\" dev",
+    "dev:packages": "pnpm --filter \"./packages/*\" dev"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

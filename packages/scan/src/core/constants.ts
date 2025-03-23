@@ -1,6 +1,6 @@
 import type { Options } from './types';
 
-export const defaultOptions: Required<Options> = {
+export const defaultOptions: Options = {
   duration: 600,
   color: 'rgba(65, 184, 131, 0.35)', // Vue green color
   enabled: true,
