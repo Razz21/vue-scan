@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import type { ComponentInternalInstance } from 'vue';
 import type { ComponentData } from './types';
 import { getComponentElement, getComponentName, isRootComponent } from './utils';
@@ -15,7 +16,10 @@ export class DataStore {
   trackComponent(instance: ComponentInternalInstance): ComponentData | undefined {
     const el = getComponentElement(instance);
     const componentName = getComponentName(instance);
-
+    if (!el) {
+      logger.error(`Failed to track component element for "${componentName}", received "${el}". Skipping.`);
+      return;
+    }
     if (!this.components.has(instance.uid)) {
       const trackedData = {
         componentName,
@@ -44,7 +48,7 @@ export class DataStore {
       data = this.trackComponent(instance);
     }
 
-    const el = data.el?.deref();
+    const el = data?.el?.deref();
     if (!el) {
       // Element was garbage collected - clean up this entry
       this.components.delete(instance.uid);
