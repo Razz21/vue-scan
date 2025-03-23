@@ -16,6 +16,7 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
     const options = { ...defaultOptions, ...customOptions };
 
     if (!options.enabled) return;
+    logger.setOptions({ enabled: options.logToConsole });
 
     if (!window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
       logger.error('__VUE_DEVTOOLS_GLOBAL_HOOK__ not available');
@@ -25,16 +26,12 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
 
     hook.on(DevToolsHooks.COMPONENT_ADDED, (_app, _uid, _parentUid, component) => {
       componentStore.markActive(component);
-      if (options.logToConsole) {
-        logger.log('COMPONENT_ADDED', getComponentName(component));
-      }
+      logger.log('COMPONENT_ADDED', getComponentName(component));
     });
 
     hook.on(DevToolsHooks.COMPONENT_UPDATED, (_app, _uid, _parentUid, component) => {
       componentStore.markActive(component);
-      if (options.logToConsole) {
-        logger.log('COMPONENT_UPDATED', getComponentName(component));
-      }
+      logger.log('COMPONENT_UPDATED', getComponentName(component));
     });
 
     hook.on(DevToolsHooks.COMPONENT_REMOVED, (_app, uid, _parentUid, component) => {
@@ -42,9 +39,7 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
        * This hook may not be called at all. Fallbacking to mixin -> beforeUnmount()
        */
       componentStore.delete(uid);
-      if (options.logToConsole) {
-        logger.log('COMPONENT_REMOVED', getComponentName(component));
-      }
+      logger.log('COMPONENT_REMOVED', getComponentName(component));
     });
 
     hook.on(DevToolsHooks.APP_UNMOUNT, (_app) => {
@@ -57,9 +52,7 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
         const instance = getCurrentInstance();
         componentStore.delete(instance.uid);
 
-        if (options.logToConsole) {
-          logger.log('COMPONENT_REMOVED', getComponentName(instance));
-        }
+        logger.log('COMPONENT_REMOVED', getComponentName(instance));
       },
     });
 

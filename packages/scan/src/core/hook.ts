@@ -79,6 +79,7 @@ export function createDevToolsHook() {
       this.events.get(event).push(handler);
     },
     once(event, handler) {
+      logger.debug('once', event);
       const onceFn = (...args: unknown[]) => {
         handler(...(args as any));
         this.off(event, onceFn);
@@ -87,9 +88,11 @@ export function createDevToolsHook() {
     },
 
     emit(event, ...args) {
+      logger.debug('emit', event, args);
       if (this.events.has(event)) this.events.get(event).forEach((fn) => fn(...args));
     },
     off(event, handler) {
+      logger.debug('off', event);
       if (!this.events.has(event)) return;
 
       const handlers = this.events.get(event);
