@@ -1,6 +1,6 @@
 
 <p align="center" style="padding: 16px;">
-  <img src=".github/assets/logo.webp" alt="Vue-scan logo" width="200">
+  <img src="https://github.com/Razz21/vue-scan/blob/main/.github/assets/logo.webp" alt="Vue-scan logo" width="200">
 </p>
 
 # vue-scan
