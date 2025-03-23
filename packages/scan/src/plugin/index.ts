@@ -1,5 +1,5 @@
 import { createDevToolsHook } from '@/core/hook';
-import { type App, type Plugin, getCurrentInstance, nextTick } from 'vue';
+import { type Plugin, getCurrentInstance, nextTick } from 'vue';
 import { cleanupCanvas, initializeCanvas } from '../canvas';
 import { DevToolsHooks, defaultOptions } from '../core/constants';
 import { componentStore } from '../core/store';
@@ -11,8 +11,8 @@ import { logger } from '../utils/logger';
 
 createDevToolsHook();
 
-const VueScanPlugin: Plugin<Options> = {
-  install(app: App, customOptions: Options) {
+const VueScanPlugin: Plugin<Partial<Options>> = {
+  install(app, customOptions) {
     const options = { ...defaultOptions, ...customOptions };
 
     if (!options.enabled) return;

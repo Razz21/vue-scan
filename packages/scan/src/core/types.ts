@@ -7,12 +7,12 @@ declare module 'vue' {
 }
 
 export interface Options {
-  duration?: number; // How long the highlight effect lasts (ms)
-  color?: string; // Highlight color
-  enabled?: boolean; // Whether highlighting is enabled by default
-  includeComponents?: string[]; // Only track these components (if empty, track all)
-  excludeComponents?: string[]; // Don't track these components
-  logToConsole?: boolean; // Whether to log re-renders to console
+  duration: number; // How long the highlight effect lasts (ms)
+  color: string; // Highlight color
+  enabled: boolean; // Whether highlighting is enabled by default
+  includeComponents: string[]; // Only track these components (if empty, track all)
+  excludeComponents: string[]; // Don't track these components
+  logToConsole: boolean; // Whether to log re-renders to console
 }
 
 // Component tracking - store component instances and their render count

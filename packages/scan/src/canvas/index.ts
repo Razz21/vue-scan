@@ -6,7 +6,7 @@ let canvas: HTMLCanvasElement | null = null;
 let ctx: CanvasRenderingContext2D | null = null;
 let animationFrameId: number | null = null;
 
-export function initializeCanvas(options: Required<Options>) {
+export function initializeCanvas(options: Options) {
   if (canvasContainer) {
     resizeCanvas();
     return;
@@ -60,7 +60,7 @@ export function resizeCanvas() {
   }
 }
 
-export function startRenderLoop(options: Required<Options>) {
+export function startRenderLoop(options: Options) {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
   }
