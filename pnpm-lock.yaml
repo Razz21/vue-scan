@@ -49,7 +49,7 @@ importers:
     dependencies:
       '@razz21/vue-scan':
         specifier: '*'
-        version: 0.1.0(vue@3.5.13(typescript@5.7.3))
+        version: 0.1.1(vue@3.5.13(typescript@5.7.3))
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.3)
@@ -506,8 +506,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@razz21/vue-scan@0.1.0':
-    resolution: {integrity: sha512-3yxQvSSFZcmKBLUJ0gghlKoUT50kWbxEdJkZiLcdtDmJm+jL8jTHSyiZ+OcJ0GpFKdGKMY/DK4drFuK+NUE+JA==}
+  '@razz21/vue-scan@0.1.1':
+    resolution: {integrity: sha512-PEs+Fkm83qDfNfprU3aikVcQbok2r3uZBNqxXioG8HaY1scQAQcKubqI4j2C2/t8OE7FQ2pmkhYraFzM0Y32Ug==}
     peerDependencies:
       vue: ^3.5.13
 
@@ -2636,7 +2636,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@razz21/vue-scan@0.1.0(vue@3.5.13(typescript@5.7.3))':
+  '@razz21/vue-scan@0.1.1(vue@3.5.13(typescript@5.7.3))':
     dependencies:
       vue: 3.5.13(typescript@5.7.3)
 

@@ -8,21 +8,23 @@ import { logger } from '@/utils/logger';
 import { type Plugin, getCurrentInstance, nextTick } from 'vue';
 
 // -----------------------------------
-
 createDevToolsHook();
 
 const VueScanPlugin: Plugin<Partial<Options>> = {
   install(app, customOptions) {
     const options = { ...defaultOptions, ...customOptions };
 
-    if (!options.enabled) return;
+    if (!options.enabled) {
+      return;
+    }
     logger.setOptions({ enabled: options.logToConsole });
 
-    if (!window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+    let hook = window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+
+    if (!hook) {
       logger.error('__VUE_DEVTOOLS_GLOBAL_HOOK__ not available');
       return;
     }
-    const hook = window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
 
     hook.on(DevToolsHooks.COMPONENT_ADDED, (_app, _uid, _parentUid, component) => {
       componentStore.markActive(component);
@@ -59,8 +61,10 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
     nextTick(() => {
       initializeCanvas(options);
     });
-
-    app.onUnmount(() => {
+    /*
+     * onUnmount is available from Vue 3.5.0
+     */
+    app.onUnmount?.(() => {
       cleanupCanvas();
     });
   },
