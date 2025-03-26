@@ -4,8 +4,11 @@ import { VueScanPlugin } from '@razz21/vue-scan';
 import App from './App.vue';
 
 const app = createApp(App);
-app.use(VueScanPlugin, {
-  // options
+
+const plugin = VueScanPlugin({
+  logToConsole: true,
+  enabled: true,
 });
+app.use(plugin);
 
 app.mount('#app');

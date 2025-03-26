@@ -1,170 +1,204 @@
-import { componentStore } from '@/core/store';
 import type { Options } from '@/core/types';
 
-let canvasContainer: HTMLElement | null = null;
-let canvas: HTMLCanvasElement | null = null;
-let ctx: CanvasRenderingContext2D | null = null;
-let animationFrameId: number | null = null;
+type ActiveRect = {
+  el: WeakRef<Element>;
+  name: string;
+  lastUpdated: number;
+  renderCount: number;
+  title: string;
+  rect?: DOMRect;
+};
 
-export function initializeCanvas(options: Options) {
-  if (canvasContainer) {
-    resizeCanvas();
-    return;
-  }
-  canvasContainer = document.createElement('div');
-  canvasContainer.id = 'vue-scan-container';
-  canvasContainer.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 99999;
-  `;
+const getDpr = () => {
+  return Math.min(window.devicePixelRatio || 1, 2);
+};
 
-  canvas = document.createElement('canvas');
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
+const extractRGB = (color: string): string => {
+  // Extract r, g, b from rgba(r, g, b, a) format
+  const match = color.match(/^rgba?\((\d+), (\d+), (\d+)(?:, [0-1](?:\.\d+)?)?\)$/);
 
-  canvasContainer.appendChild(canvas);
-  document.body.appendChild(canvasContainer);
-
-  ctx = canvas.getContext('2d');
-
-  resizeCanvas();
-
-  window.addEventListener('resize', resizeCanvas);
-
-  startRenderLoop(options);
-}
-
-export function resizeCanvas() {
-  if (!canvas) return;
-
-  const dpr = window.devicePixelRatio || 1;
-  const displayWidth = window.innerWidth;
-  const displayHeight = window.innerHeight;
-
-  canvas.width = displayWidth * dpr;
-  canvas.height = displayHeight * dpr;
-
-  canvas.style.width = `${displayWidth}px`;
-  canvas.style.height = `${displayHeight}px`;
-  if (ctx) {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
-  }
-}
-
-export function startRenderLoop(options: Options) {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
+  if (!match) {
+    throw new Error('Invalid color format');
   }
 
-  let needsRedraw = true;
+  // Return the "r,g,b" part as a string
+  return `${match[1]},${match[2]},${match[3]}`;
+};
 
-  function render() {
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
+export class VueScanCanvas {
+  private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
+  private animationFrameId: number | null = null;
+  private options: Partial<Options>;
+  private activeRects: Map<number, ActiveRect> = new Map();
+
+  constructor(container: HTMLElement, options: Partial<Options> = {}) {
+    this.options = options;
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = '0';
+    this.canvas.style.left = '0';
+    container.appendChild(this.canvas);
+
+    this.ctx = this.canvas.getContext('2d');
+
+    this.resizeCanvas();
+
+    this.boundResizeCanvas = this.resizeCanvas.bind(this);
+
+    window.addEventListener('resize', this.boundResizeCanvas);
+  }
+
+  private boundResizeCanvas: () => void;
+
+  public highlight({
+    el,
+    name,
+    uid,
+    renderCount,
+    lastUpdated,
+  }: {
+    el: WeakRef<HTMLElement>;
+    name: string;
+    uid: number;
+    renderCount: number;
+    lastUpdated: number;
+  }) {
+    this.activeRects.set(uid, {
+      el,
+      name,
+      lastUpdated,
+      renderCount,
+      title: `${name} x${renderCount}`,
+    });
+
+    if (!this.animationFrameId) {
+      this.render();
     }
-    if (!canvas || !ctx) return;
+  }
 
-    // Only redraw if needed
-    if (needsRedraw) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  public deleteElement(uid: number) {
+    this.activeRects.delete(uid);
 
-      const now = performance.now();
-      let hasActiveHighlight = false;
+    if (this.activeRects.size === 0 && this.animationFrameId != null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
 
-      componentStore.getComponents().forEach((data, uid) => {
-        const el = data.el?.deref();
-        if (!el?.isConnected) {
-          componentStore.delete(uid);
-          return;
-        }
-
-        const timeSinceUpdate = now - data.lastUpdated;
-
-        // If within highlight duration, draw highlight
-        if (timeSinceUpdate <= options.duration) {
-          try {
-            const rect = el.getBoundingClientRect();
-
-            // Skip elements with zero dimensions
-            if (rect.width <= 0 || rect.height <= 0) return;
-
-            const opacity = 1 - timeSinceUpdate / options.duration;
-            if (!ctx) return;
-
-            const left = Math.max(0, rect.left);
-            const top = Math.max(0, rect.top);
-            const width = Math.max(1, rect.width);
-            const height = Math.max(1, rect.height);
-
-            // Outline rect
-            ctx.fillStyle = options.color.replace(/[\d.]+\)$/, `${opacity * 0.6})`);
-            ctx.strokeStyle = options.color.replace(/[\d.]+\)$/, `${opacity})`);
-            ctx.lineWidth = 2;
-            ctx.fillRect(left, top, width, height);
-            ctx.strokeRect(left, top, width, height);
-
-            // Header
-            ctx.font = '12px Consolas, monospace';
-            const textToDisplay = `${data.componentName} x${data.renderCount}`;
-            const textHeight = 16;
-
-            ctx.fillStyle = options.color.replace(/[\d.]+\)$/, `${Math.min(opacity + 0.2, 0.6)})`);
-            ctx.fillRect(left, top - textHeight, width, textHeight);
-
-            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-            ctx.fillText(textToDisplay, left + 4, top - 4);
-
-            hasActiveHighlight = true;
-          } catch (_error) {
-            // Silently ignore rendering errors
-            componentStore.delete(uid);
-          }
-        }
-      });
-
-      // Only redraw next frame if we have active highlights
-      needsRedraw = hasActiveHighlight;
-    } else {
-      const now = performance.now();
-
-      componentStore.getComponents().forEach((data) => {
-        const el = data.el?.deref();
-        if (el?.isConnected) {
-          const timeSinceUpdate = now - data.lastUpdated;
-          if (timeSinceUpdate <= options.duration) {
-            needsRedraw = true;
-          }
-        }
-      });
+      if (this.canvas && this.ctx) {
+        const dpr = getDpr();
+        this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
+      }
     }
-
-    animationFrameId = requestAnimationFrame(render);
   }
 
-  animationFrameId = requestAnimationFrame(render);
-}
+  private resizeCanvas() {
+    if (!this.canvas) return;
 
-export function cleanupCanvas() {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
+    const dpr = getDpr();
+    const displayWidth = window.innerWidth;
+    const displayHeight = window.innerHeight;
+
+    this.canvas.width = displayWidth * dpr;
+    this.canvas.height = displayHeight * dpr;
+
+    this.canvas.style.width = `${displayWidth}px`;
+    this.canvas.style.height = `${displayHeight}px`;
+
+    if (this.ctx) {
+      this.ctx.resetTransform();
+      this.ctx.scale(dpr, dpr);
+    }
   }
 
-  if (canvasContainer && canvasContainer.parentNode) {
-    canvasContainer.parentNode.removeChild(canvasContainer);
-    canvasContainer = null;
-    canvas = null;
-    ctx = null;
+  private render() {
+    if (!this.canvas || !this.ctx) return;
+    this.animationFrameId = requestAnimationFrame(() => this.render());
+
+    const dpr = getDpr();
+    this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
+
+    const now = performance.now();
+
+    const { duration } = this.options;
+    const colorRgb = extractRGB(this.options.color);
+    const ctx = this.ctx;
+
+    this.activeRects.forEach((activeElement, uid) => {
+      const { el, lastUpdated } = activeElement;
+      const timeSinceUpdate = now - lastUpdated;
+      const element = el?.deref();
+
+      if (timeSinceUpdate > duration) {
+        this.activeRects.delete(uid);
+        return;
+      }
+
+      if (!element?.isConnected) return;
+
+      if (!activeElement.rect) {
+        activeElement.rect = element.getBoundingClientRect();
+      }
+
+      this.drawRect({
+        ctx,
+        color: colorRgb,
+        opacity: 1 - timeSinceUpdate / duration,
+        rect: activeElement.rect,
+        title: activeElement.title,
+      });
+    });
+
+    if (this.activeRects.size === 0 && this.animationFrameId != null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
   }
 
-  window.removeEventListener('resize', resizeCanvas);
+  private drawRect({
+    ctx,
+    rect,
+    color,
+    title,
+    opacity,
+  }: {
+    ctx: CanvasRenderingContext2D;
+    rect: DOMRect;
+    color: string;
+    title: string;
+    opacity: number;
+  }) {
+    const { left, top, width, height } = rect;
+
+    // Outline rect
+    ctx.fillStyle = `rgba(${color},${opacity * 0.6})`;
+    ctx.strokeStyle = `rgba(${color},${opacity})`;
+    ctx.lineWidth = 2;
+    ctx.fillRect(left, top, width, height);
+    ctx.strokeRect(left, top, width, height);
+
+    // Header
+    ctx.font = '12px Consolas, monospace';
+    const textHeight = 16;
+
+    ctx.fillStyle = `rgba(${color},${Math.min(opacity + 0.2, 0.6)})`;
+    ctx.fillRect(left, top - textHeight, width, textHeight);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    ctx.fillText(title, left + 4, top - 4);
+  }
+
+  public clear() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    this.canvas?.remove();
+    this.canvas = null;
+    this.ctx = null;
+    this.activeRects.clear();
+
+    window.removeEventListener('resize', this.boundResizeCanvas);
+  }
 }

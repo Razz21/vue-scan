@@ -17,10 +17,10 @@ export interface Options {
 
 // Component tracking - store component instances and their render count
 export interface ComponentData {
-  el?: WeakRef<HTMLElement>;
+  el: WeakRef<HTMLElement>;
   instance: WeakRef<ComponentInternalInstance>;
   renderCount: number;
   lastUpdated: number;
-  componentName: string;
-  componentUid: number;
+  name: string;
+  uid: number;
 }
