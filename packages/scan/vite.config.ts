@@ -10,6 +10,8 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  base: './',
+  assetsInclude: ['worker.js'],
   build: {
     target: 'esnext',
     sourcemap: true,

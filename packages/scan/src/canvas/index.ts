@@ -1,13 +1,6 @@
-import type { Options } from '@/core/types';
-
-type ActiveRect = {
-  el: WeakRef<Element>;
-  name: string;
-  lastUpdated: number;
-  renderCount: number;
-  title: string;
-  rect?: DOMRect;
-};
+import type { ComponentData, Options } from '@/core/types';
+import { debounce } from '@/core/utils';
+import type { BatchRect } from './types';
 
 const getDpr = () => {
   return Math.min(window.devicePixelRatio || 1, 2);
@@ -25,180 +18,136 @@ const extractRGB = (color: string): string => {
   return `${match[1]},${match[2]},${match[3]}`;
 };
 
+const MAX_BATCH_SIZE = 500;
+
 export class VueScanCanvas {
   private canvas: HTMLCanvasElement | null = null;
-  private ctx: CanvasRenderingContext2D | null = null;
-  private animationFrameId: number | null = null;
-  private options: Partial<Options>;
-  private activeRects: Map<number, ActiveRect> = new Map();
+  private options: Options | undefined;
+  private worker: Worker | null = null;
 
-  constructor(container: HTMLElement, options: Partial<Options> = {}) {
+  private batchRaF: number | null = null;
+  private batch: BatchRect[] = [];
+  private batchSize = 0;
+
+  constructor(container: HTMLElement, options?: Options) {
     this.options = options;
     this.canvas = document.createElement('canvas');
-    this.canvas.style.width = '100%';
-    this.canvas.style.height = '100%';
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.top = '0';
-    this.canvas.style.left = '0';
+    this.canvas.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    `;
     container.appendChild(this.canvas);
-
-    this.ctx = this.canvas.getContext('2d');
-
     this.resizeCanvas();
 
-    this.boundResizeCanvas = this.resizeCanvas.bind(this);
+    this.worker = new Worker(new URL('./offscreen-canvas.worker.ts', import.meta.url), {
+      type: 'classic',
+      name: 'VueScanCanvasWorker',
+      credentials: 'same-origin',
+    });
+    const offscreenCanvas = this.canvas.transferControlToOffscreen();
 
-    window.addEventListener('resize', this.boundResizeCanvas);
+    this.worker?.postMessage(
+      {
+        type: 'init',
+        canvas: offscreenCanvas,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        dpr: getDpr(),
+        color: extractRGB(this.options.color),
+      },
+      [offscreenCanvas]
+    );
+
+    this.onResizeCanvas = debounce(() => {
+      this.resizeCanvas();
+
+      this.worker?.postMessage({
+        type: 'resize',
+        width: window.innerWidth,
+        height: window.innerHeight,
+        dpr: getDpr(),
+      });
+    }, 100);
+
+    window.addEventListener('resize', this.onResizeCanvas);
   }
 
-  private boundResizeCanvas: () => void;
+  public async highlight({ rect, name, uid }: ComponentData) {
+    return await new Promise<void>((resolve) => {
+      this.batch.push({
+        uid,
+        name,
+        rect,
+      });
+      this.batchSize++;
 
-  public highlight({
-    el,
-    name,
-    uid,
-    renderCount,
-    lastUpdated,
-  }: {
-    el: WeakRef<HTMLElement>;
-    name: string;
-    uid: number;
-    renderCount: number;
-    lastUpdated: number;
-  }) {
-    this.activeRects.set(uid, {
-      el,
-      name,
-      lastUpdated,
-      renderCount,
-      title: `${name} x${renderCount}`,
+      // If batch size exceeds max size, send and reset
+      if (this.batchSize >= MAX_BATCH_SIZE) {
+        this.sendBatch();
+        return resolve();
+      }
+
+      if (!this.batchRaF) {
+        this.batchRaF = requestIdleCallback(() => {
+          if (this.batchSize > 0) {
+            this.sendBatch();
+          }
+        });
+      }
+      resolve();
+    });
+  }
+
+  private onResizeCanvas: () => void;
+
+  /**
+   * Send the batch to the worker and reset it.
+   */
+  private sendBatch() {
+    const batch = this.batch;
+
+    this.worker?.postMessage({
+      type: 'highlight',
+      rects: batch,
     });
 
-    if (!this.animationFrameId) {
-      this.render();
+    this.batch.length = 0;
+    this.batchSize = 0;
+
+    if (this.batchRaF !== null) {
+      cancelAnimationFrame(this.batchRaF);
+      this.batchRaF = null;
     }
   }
 
   public deleteElement(uid: number) {
-    this.activeRects.delete(uid);
-
-    if (this.activeRects.size === 0 && this.animationFrameId != null) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-
-      if (this.canvas && this.ctx) {
-        const dpr = getDpr();
-        this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
-      }
-    }
+    this.worker.postMessage({
+      type: 'delete',
+      uid,
+    });
   }
 
   private resizeCanvas() {
     if (!this.canvas) return;
 
-    const dpr = getDpr();
-    const displayWidth = window.innerWidth;
-    const displayHeight = window.innerHeight;
-
-    this.canvas.width = displayWidth * dpr;
-    this.canvas.height = displayHeight * dpr;
-
-    this.canvas.style.width = `${displayWidth}px`;
-    this.canvas.style.height = `${displayHeight}px`;
-
-    if (this.ctx) {
-      this.ctx.resetTransform();
-      this.ctx.scale(dpr, dpr);
-    }
-  }
-
-  private render() {
-    if (!this.canvas || !this.ctx) return;
-    this.animationFrameId = requestAnimationFrame(() => this.render());
-
-    const dpr = getDpr();
-    this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
-
-    const now = performance.now();
-
-    const { duration } = this.options;
-    const colorRgb = extractRGB(this.options.color);
-    const ctx = this.ctx;
-
-    this.activeRects.forEach((activeElement, uid) => {
-      const { el, lastUpdated } = activeElement;
-      const timeSinceUpdate = now - lastUpdated;
-      const element = el?.deref();
-
-      if (timeSinceUpdate > duration) {
-        this.activeRects.delete(uid);
-        return;
-      }
-
-      if (!element?.isConnected) return;
-
-      if (!activeElement.rect) {
-        activeElement.rect = element.getBoundingClientRect();
-      }
-
-      this.drawRect({
-        ctx,
-        color: colorRgb,
-        opacity: 1 - timeSinceUpdate / duration,
-        rect: activeElement.rect,
-        title: activeElement.title,
-      });
-    });
-
-    if (this.activeRects.size === 0 && this.animationFrameId != null) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
-
-  private drawRect({
-    ctx,
-    rect,
-    color,
-    title,
-    opacity,
-  }: {
-    ctx: CanvasRenderingContext2D;
-    rect: DOMRect;
-    color: string;
-    title: string;
-    opacity: number;
-  }) {
-    const { left, top, width, height } = rect;
-
-    // Outline rect
-    ctx.fillStyle = `rgba(${color},${opacity * 0.6})`;
-    ctx.strokeStyle = `rgba(${color},${opacity})`;
-    ctx.lineWidth = 2;
-    ctx.fillRect(left, top, width, height);
-    ctx.strokeRect(left, top, width, height);
-
-    // Header
-    ctx.font = '12px Consolas, monospace';
-    const textHeight = 16;
-
-    ctx.fillStyle = `rgba(${color},${Math.min(opacity + 0.2, 0.6)})`;
-    ctx.fillRect(left, top - textHeight, width, textHeight);
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-    ctx.fillText(title, left + 4, top - 4);
+    this.canvas.style.width = `${window.innerWidth}px`;
+    this.canvas.style.height = `${window.innerHeight}px`;
   }
 
   public clear() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
     this.canvas?.remove();
     this.canvas = null;
-    this.ctx = null;
-    this.activeRects.clear();
 
-    window.removeEventListener('resize', this.boundResizeCanvas);
+    window.removeEventListener('resize', this.onResizeCanvas);
+
+    this.worker?.postMessage({
+      type: 'clear',
+    });
+
+    this.worker?.terminate();
+    this.worker = null;
   }
 }

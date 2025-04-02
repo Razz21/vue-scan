@@ -17,6 +17,7 @@ export interface Options {
 
 // Component tracking - store component instances and their render count
 export interface ComponentData {
+  rect: DOMRect;
   el: WeakRef<HTMLElement>;
   instance: WeakRef<ComponentInternalInstance>;
   renderCount: number;

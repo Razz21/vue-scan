@@ -33,3 +33,10 @@ export function getComponentElement(instance: ComponentInternalInstance): HTMLEl
   // recursively search for the closest DOM element in Fragment or muli-root components
   return findRootNode(el);
 }
+export const debounce = (fn: Function, ms = 300) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+  };
+};
