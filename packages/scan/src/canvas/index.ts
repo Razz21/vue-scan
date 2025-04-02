@@ -43,9 +43,8 @@ export class VueScanCanvas {
     this.resizeCanvas();
 
     this.worker = new Worker(new URL('./offscreen-canvas.worker.ts', import.meta.url), {
-      type: 'classic',
+      type: 'module',
       name: 'VueScanCanvasWorker',
-      credentials: 'same-origin',
     });
     const offscreenCanvas = this.canvas.transferControlToOffscreen();
 
