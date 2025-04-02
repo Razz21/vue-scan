@@ -8,6 +8,7 @@ let dpr = 1;
 const activeRects: Map<number, Partial<ActiveRect>> = new Map();
 let animationFrameId: number | null = null;
 let color: string = '65, 184, 131';
+let duration = 500;
 
 type Messages =
   | {
@@ -17,6 +18,7 @@ type Messages =
       height: number;
       dpr: number;
       color: string;
+      duration: number;
     }
   | {
       type: 'highlight';
@@ -45,7 +47,7 @@ const draw = () => {
     ctx,
     activeRects,
     dpr,
-    duration: 500,
+    duration,
     color,
   });
 
@@ -61,13 +63,21 @@ addEventListener('message', (event: MessageEvent<Messages>) => {
   const { type } = event.data;
 
   if (type === 'init') {
-    const { canvas: offscreenCanvas, width, height, dpr: canvasDpr, color: rectColor } = event.data;
+    const {
+      canvas: offscreenCanvas,
+      width,
+      height,
+      dpr: canvasDpr,
+      color: rectColor,
+      duration: highlightDuration,
+    } = event.data;
     canvas = offscreenCanvas;
     ctx = canvas.getContext('2d');
     dpr = canvasDpr;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     color = rectColor;
+    duration = highlightDuration;
 
     if (ctx) {
       ctx.resetTransform();

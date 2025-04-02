@@ -57,6 +57,7 @@ export class VueScanCanvas {
         height: window.innerHeight,
         dpr: getDpr(),
         color: extractRGB(this.options.color),
+        duration: this.options.duration,
       },
       [offscreenCanvas]
     );
