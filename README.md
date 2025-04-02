@@ -42,9 +42,12 @@ npm install @razz21/vue-scan
 import { VueScanPlugin } from '@razz21/vue-scan';
 
 const app = createApp(App);
-app.use(VueScanPlugin, {
+
+const plugin = VueScanPlugin({
   // options
 });
+
+app.use(plugin);
 app.mount('#app');
 
 ```
@@ -53,7 +56,7 @@ app.mount('#app');
 
 | Option              | Type       | Default                    | Description                                         |
 | ------------------- | ---------- | -------------------------- | --------------------------------------------------- |
-| `color`             | `string`   | `rgba(65, 184, 131, 0.35)` | Highlight effect color                              |
+| `color`             | `string`   | `rgba(65, 184, 131)` | Highlight effect color                              |
 | `duration`          | `number`   | `600`                      | Highlight effect fade-out time in milliseconds      |
 | `enabled`           | `boolean`  | `true`                     | Enable or disable the plugin globally               |
 | `logToConsole`      | `boolean`  | `false`                    | Log component debug information to the console      |
