@@ -71,6 +71,6 @@ export function drawRect({
   ctx.fillStyle = `rgba(${color},${Math.min(opacity + 0.2, 0.6)})`;
   ctx.fillRect(left, top - textHeight, width, textHeight);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+  ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`
   ctx.fillText(title, left + 4, top - 4);
 }
