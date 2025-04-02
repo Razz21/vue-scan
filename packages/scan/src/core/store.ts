@@ -42,7 +42,16 @@ export class VueScanStore {
   async trackRender(instance: ComponentInternalInstance) {
     if (isRootComponent(instance)) return;
 
-    return await this.getTrackedInstance(instance);
+    const data = await this.getTrackedInstance(instance);
+    const el = data.el?.deref();
+    if (!el.isConnected) {
+      this.store.delete(instance.uid);
+      return;
+    }
+
+    data.rect = el.getBoundingClientRect();
+
+    return data;
   }
 
   getStore(): Map<number, ComponentData> {
