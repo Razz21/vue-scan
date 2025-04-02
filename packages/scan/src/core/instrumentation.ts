@@ -10,11 +10,10 @@ export class VueScanInstrumentation {
     private canvas: VueScanCanvas
   ) {}
 
-  track(instance: ComponentInternalInstance): void {
-    const data = this.store.trackRender(instance);
-    if (data) {
-      this.canvas.highlight(data);
-    }
+  async track(instance: ComponentInternalInstance): Promise<void> {
+    const data = await this.store.trackRender(instance);
+    if (!data) return;
+    await this.canvas.highlight(data);
   }
 
   delete(uid: number): void {
@@ -25,5 +24,16 @@ export class VueScanInstrumentation {
   clear(): void {
     this.canvas.clear();
     this.store.clear();
+  }
+
+  garbageCollectElements(): void {
+    this.store.getStore().forEach((data) => {
+      const instance = data.instance.deref();
+      const el = data.el?.deref();
+
+      if (!(instance && el?.isConnected)) {
+        this.delete(data.uid);
+      }
+    });
   }
 }
