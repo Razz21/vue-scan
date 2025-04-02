@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer base {
+
+  html,
+  body,
+  #app {
+    @apply size-full;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-[#020618] to-[#02180e] flex;
+  }
+}
