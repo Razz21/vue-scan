@@ -5,10 +5,8 @@ import App from './App.vue';
 
 const app = createApp(App);
 
-const plugin = VueScanPlugin({
-  logToConsole: true,
-  enabled: true,
-});
+const plugin = VueScanPlugin();
+
 app.use(plugin);
 
 app.mount('#app');
