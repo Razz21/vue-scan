@@ -47,15 +47,17 @@ const VueScanPlugin = (customOptions: Partial<Options> = {}): Plugin => {
       const hook = window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
       if (!hook) {
         logger.error('__VUE_DEVTOOLS_GLOBAL_HOOK__ not available');
+        instrumentation.clear();
+        return;
       }
 
       hook.on(DevToolsHooks.COMPONENT_ADDED, (_app, _uid, _parentUid, component) => {
-        instrumentation.track(component);
+        requestIdleCallback(async () => await instrumentation.track(component));
         logger.log('COMPONENT_ADDED', getComponentName(component));
       });
 
       hook.on(DevToolsHooks.COMPONENT_UPDATED, (_app, _uid, _parentUid, component) => {
-        instrumentation.track(component);
+        requestIdleCallback(async () => await instrumentation.track(component));
         logger.log('COMPONENT_UPDATED', getComponentName(component));
       });
 
@@ -63,7 +65,7 @@ const VueScanPlugin = (customOptions: Partial<Options> = {}): Plugin => {
         /*
          * This hook may not be called at all. Fallbacking to mixin -> beforeUnmount()
          */
-        instrumentation.delete(uid);
+        requestIdleCallback(() => instrumentation.delete(uid), { timeout: 1000 });
         logger.log('COMPONENT_REMOVED', getComponentName(component));
       });
 
@@ -75,11 +77,13 @@ const VueScanPlugin = (customOptions: Partial<Options> = {}): Plugin => {
         beforeUnmount() {
           // TODO: hook up into global event
           const instance = getCurrentInstance();
-          instrumentation.delete(instance.uid);
-
-          logger.log('COMPONENT_REMOVED', getComponentName(instance));
+          requestIdleCallback(() => instrumentation.delete(instance.uid), { timeout: 1000 });
         },
       });
+
+      setInterval(() => {
+        requestIdleCallback(() => instrumentation.garbageCollectElements());
+      }, 5000);
 
       /*
        * onUnmount is available from Vue 3.5.0
