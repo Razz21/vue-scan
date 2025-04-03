@@ -14,19 +14,12 @@
 
 `Vue-scan` is a lightweight utility tool that may help you to identify bottlenecks in your Vue application by tracking and visualising component renders and re-renders with minimal performance impact.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/Razz21/vue-scan/tree/main/examples/vue-spa)
-
 ## Why?
 
 To address a critical gap in Vue development: the need for immediate, visual feedback when components mount and update. While Vue DevTools provides comprehensive debugging capabilities, it lacks direct visual indication of component rendering activity within the application UI itself.
 
 ## How It Works
 The tool leverages Vue's internal mechanisms to track component lifecycle events without modifying your components or DOM elements directly.
-
-## Demo
-
-https://github.com/user-attachments/assets/021e0d70-d7e3-447e-943d-788e9a0f37ce
-
 
 ## Installation
 
@@ -51,14 +44,14 @@ app.mount('#app');
 
 **Options**
 
-| Option              | Type       | Default                    | Description                                         |
-| ------------------- | ---------- | -------------------------- | --------------------------------------------------- |
-| `color`             | `string`   | `rgba(65, 184, 131, 0.35)` | Highlight effect color                              |
-| `duration`          | `number`   | `600`                      | Highlight effect fade-out time in milliseconds      |
-| `enabled`           | `boolean`  | `true`                     | Enable or disable the plugin globally               |
-| `logToConsole`      | `boolean`  | `false`                    | Log component debug information to the console      |
-| `excludeComponents` | `string[]` | `[]`                       | Array of component names to exclude from tracking   |
-| `includeComponents` | `string[]` | `[]`                       | If provided, only track components with these names |
+| Option              | Type       | Default              | Description                                         |
+| ------------------- | ---------- | -------------------- | --------------------------------------------------- |
+| `color`             | `string`   | `rgba(65, 184, 131)` | Highlight effect color                              |
+| `duration`          | `number`   | `600`                | Highlight effect fade-out time in milliseconds      |
+| `enabled`           | `boolean`  | `true`               | Enable or disable the plugin globally               |
+| `logToConsole`      | `boolean`  | `false`              | Log component debug information to the console      |
+| `excludeComponents` | `string[]` | `[]`                 | Array of component names to exclude from tracking   |
+| `includeComponents` | `string[]` | `[]`                 | If provided, only track components with these names |
 
 ## FAQ
 

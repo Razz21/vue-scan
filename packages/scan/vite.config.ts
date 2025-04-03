@@ -11,7 +11,12 @@ export default defineConfig({
     },
   },
   base: './',
-  assetsInclude: ['worker.js'],
+  worker: {
+    format: 'es',
+  },
+  optimizeDeps: {
+    exclude: ['offscreen-canvas.worker'],
+  },
   build: {
     target: 'esnext',
     sourcemap: true,
