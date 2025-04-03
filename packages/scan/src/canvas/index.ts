@@ -1,5 +1,6 @@
 import type { ComponentData, Options } from '@/core/types';
 import { debounce } from '@/core/utils';
+import OffscreenCanvasWorker from './offscreen-canvas.worker?worker&inline';
 import type { BatchRect } from './types';
 
 const getDpr = () => {
@@ -42,10 +43,7 @@ export class VueScanCanvas {
     container.appendChild(this.canvas);
     this.resizeCanvas();
 
-    this.worker = new Worker(new URL('./offscreen-canvas.worker.ts', import.meta.url), {
-      type: 'module',
-      name: 'VueScanCanvasWorker',
-    });
+    this.worker = new OffscreenCanvasWorker({ name: 'VueScanOffscreenCanvas' });
     const offscreenCanvas = this.canvas.transferControlToOffscreen();
 
     this.worker?.postMessage(
