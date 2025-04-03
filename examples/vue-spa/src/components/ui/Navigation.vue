@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends Tab">
-import { defineProps, ref } from 'vue';
+import { ref } from 'vue';
 
 export interface Tab {
   label: string;
