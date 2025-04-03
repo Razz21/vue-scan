@@ -3,4 +3,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [vue()],
+  optimizeDeps: {
+    exclude: ["@razz21/vue-scan"]
+  }
 });

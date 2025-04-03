@@ -4,12 +4,12 @@ type LogOptions = {
 };
 
 export const createLogger = (prefix: string, options: LogOptions = {}) => {
-  const opts = { enabled: true, ...options };
+  const opts = { ...options };
 
   const prefixText = prefix ? `[${prefix}]` : '';
 
   const _log = (level: LogLevel, color: string, ...args: any[]) => {
-    if (opts.enabled === false) return;
+    if (!opts.enabled) return;
 
     console[level](
       `%c${prefixText} [${level.toUpperCase()}]`,

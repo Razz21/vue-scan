@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Todo, useTodoStore } from '../store/todoStore';
+import { type Todo, useTodoStore } from '../../store/todoStore';
 
 defineProps<{
   todo: Todo;
@@ -9,14 +9,14 @@ const todoStore = useTodoStore();
 
 <template>
   <li
-    class="group flex items-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-2 border-transparent hover:border-violet-200 transition-all duration-200 shadow-sm"
+    class="group flex items-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-2 border-transparent transition-all duration-200 shadow-sm"
   >
     <label class="flex gap-3 items-center cursor-pointer">
       <input
         type="checkbox"
         :checked="todo.completed"
         @change="todoStore.toggleTodo(todo)"
-        class="w-5 h-5 rounded-md border-2 border-violet-300 text-violet-500 focus:ring-violet-200 transition-colors duration-200"
+        class="w-5 h-5 rounded-md border-2 transition-colors duration-200"
       />
       <span
         :class="{

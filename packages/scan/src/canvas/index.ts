@@ -1,170 +1,153 @@
-import { componentStore } from '@/core/store';
-import type { Options } from '@/core/types';
+import type { ComponentData, Options } from '@/core/types';
+import { debounce } from '@/core/utils';
+import type { BatchRect } from './types';
 
-let canvasContainer: HTMLElement | null = null;
-let canvas: HTMLCanvasElement | null = null;
-let ctx: CanvasRenderingContext2D | null = null;
-let animationFrameId: number | null = null;
+const getDpr = () => {
+  return Math.min(window.devicePixelRatio || 1, 2);
+};
 
-export function initializeCanvas(options: Options) {
-  if (canvasContainer) {
-    resizeCanvas();
-    return;
-  }
-  canvasContainer = document.createElement('div');
-  canvasContainer.id = 'vue-scan-container';
-  canvasContainer.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 99999;
-  `;
+const extractRGB = (color: string): string => {
+  // Extract r, g, b from rgba(r, g, b, a) format
+  const match = color.match(/^rgba?\((\d+), (\d+), (\d+)(?:, [0-1](?:\.\d+)?)?\)$/);
 
-  canvas = document.createElement('canvas');
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
-
-  canvasContainer.appendChild(canvas);
-  document.body.appendChild(canvasContainer);
-
-  ctx = canvas.getContext('2d');
-
-  resizeCanvas();
-
-  window.addEventListener('resize', resizeCanvas);
-
-  startRenderLoop(options);
-}
-
-export function resizeCanvas() {
-  if (!canvas) return;
-
-  const dpr = window.devicePixelRatio || 1;
-  const displayWidth = window.innerWidth;
-  const displayHeight = window.innerHeight;
-
-  canvas.width = displayWidth * dpr;
-  canvas.height = displayHeight * dpr;
-
-  canvas.style.width = `${displayWidth}px`;
-  canvas.style.height = `${displayHeight}px`;
-  if (ctx) {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
-  }
-}
-
-export function startRenderLoop(options: Options) {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
+  if (!match) {
+    throw new Error('Invalid color format');
   }
 
-  let needsRedraw = true;
+  // Return the "r,g,b" part as a string
+  return `${match[1]},${match[2]},${match[3]}`;
+};
 
-  function render() {
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-    }
-    if (!canvas || !ctx) return;
+const MAX_BATCH_SIZE = 500;
 
-    // Only redraw if needed
-    if (needsRedraw) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+export class VueScanCanvas {
+  private canvas: HTMLCanvasElement | null = null;
+  private options: Options | undefined;
+  private worker: Worker | null = null;
 
-      const now = performance.now();
-      let hasActiveHighlight = false;
+  private batchRaF: number | null = null;
+  private batch: BatchRect[] = [];
+  private batchSize = 0;
 
-      componentStore.getComponents().forEach((data, uid) => {
-        const el = data.el?.deref();
-        if (!el?.isConnected) {
-          componentStore.delete(uid);
-          return;
-        }
+  constructor(container: HTMLElement, options?: Options) {
+    this.options = options;
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    `;
+    container.appendChild(this.canvas);
+    this.resizeCanvas();
 
-        const timeSinceUpdate = now - data.lastUpdated;
+    this.worker = new Worker(new URL('./offscreen-canvas.worker.ts', import.meta.url), {
+      type: 'module',
+      name: 'VueScanCanvasWorker',
+    });
+    const offscreenCanvas = this.canvas.transferControlToOffscreen();
 
-        // If within highlight duration, draw highlight
-        if (timeSinceUpdate <= options.duration) {
-          try {
-            const rect = el.getBoundingClientRect();
+    this.worker?.postMessage(
+      {
+        type: 'init',
+        canvas: offscreenCanvas,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        dpr: getDpr(),
+        color: extractRGB(this.options.color),
+        duration: this.options.duration,
+      },
+      [offscreenCanvas]
+    );
 
-            // Skip elements with zero dimensions
-            if (rect.width <= 0 || rect.height <= 0) return;
+    this.onResizeCanvas = debounce(() => {
+      this.resizeCanvas();
 
-            const opacity = 1 - timeSinceUpdate / options.duration;
-            if (!ctx) return;
-
-            const left = Math.max(0, rect.left);
-            const top = Math.max(0, rect.top);
-            const width = Math.max(1, rect.width);
-            const height = Math.max(1, rect.height);
-
-            // Outline rect
-            ctx.fillStyle = options.color.replace(/[\d.]+\)$/, `${opacity * 0.6})`);
-            ctx.strokeStyle = options.color.replace(/[\d.]+\)$/, `${opacity})`);
-            ctx.lineWidth = 2;
-            ctx.fillRect(left, top, width, height);
-            ctx.strokeRect(left, top, width, height);
-
-            // Header
-            ctx.font = '12px Consolas, monospace';
-            const textToDisplay = `${data.componentName} x${data.renderCount}`;
-            const textHeight = 16;
-
-            ctx.fillStyle = options.color.replace(/[\d.]+\)$/, `${Math.min(opacity + 0.2, 0.6)})`);
-            ctx.fillRect(left, top - textHeight, width, textHeight);
-
-            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-            ctx.fillText(textToDisplay, left + 4, top - 4);
-
-            hasActiveHighlight = true;
-          } catch (_error) {
-            // Silently ignore rendering errors
-            componentStore.delete(uid);
-          }
-        }
+      this.worker?.postMessage({
+        type: 'resize',
+        width: window.innerWidth,
+        height: window.innerHeight,
+        dpr: getDpr(),
       });
+    }, 100);
 
-      // Only redraw next frame if we have active highlights
-      needsRedraw = hasActiveHighlight;
-    } else {
-      const now = performance.now();
+    window.addEventListener('resize', this.onResizeCanvas);
+  }
 
-      componentStore.getComponents().forEach((data) => {
-        const el = data.el?.deref();
-        if (el?.isConnected) {
-          const timeSinceUpdate = now - data.lastUpdated;
-          if (timeSinceUpdate <= options.duration) {
-            needsRedraw = true;
-          }
-        }
+  public async highlight({ rect, name, uid }: ComponentData) {
+    return await new Promise<void>((resolve) => {
+      this.batch.push({
+        uid,
+        name,
+        rect,
       });
+      this.batchSize++;
+
+      // If batch size exceeds max size, send and reset
+      if (this.batchSize >= MAX_BATCH_SIZE) {
+        this.sendBatch();
+        return resolve();
+      }
+
+      if (!this.batchRaF) {
+        this.batchRaF = requestIdleCallback(() => {
+          if (this.batchSize > 0) {
+            this.sendBatch();
+          }
+        });
+      }
+      resolve();
+    });
+  }
+
+  private onResizeCanvas: () => void;
+
+  /**
+   * Send the batch to the worker and reset it.
+   */
+  private sendBatch() {
+    const batch = this.batch;
+
+    this.worker?.postMessage({
+      type: 'highlight',
+      rects: batch,
+    });
+
+    this.batch.length = 0;
+    this.batchSize = 0;
+
+    if (this.batchRaF !== null) {
+      cancelAnimationFrame(this.batchRaF);
+      this.batchRaF = null;
     }
-
-    animationFrameId = requestAnimationFrame(render);
   }
 
-  animationFrameId = requestAnimationFrame(render);
-}
-
-export function cleanupCanvas() {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
+  public deleteElement(uid: number) {
+    this.worker.postMessage({
+      type: 'delete',
+      uid,
+    });
   }
 
-  if (canvasContainer && canvasContainer.parentNode) {
-    canvasContainer.parentNode.removeChild(canvasContainer);
-    canvasContainer = null;
-    canvas = null;
-    ctx = null;
+  private resizeCanvas() {
+    if (!this.canvas) return;
+
+    this.canvas.style.width = `${window.innerWidth}px`;
+    this.canvas.style.height = `${window.innerHeight}px`;
   }
 
-  window.removeEventListener('resize', resizeCanvas);
+  public clear() {
+    this.canvas?.remove();
+    this.canvas = null;
+
+    window.removeEventListener('resize', this.onResizeCanvas);
+
+    this.worker?.postMessage({
+      type: 'clear',
+    });
+
+    this.worker?.terminate();
+    this.worker = null;
+  }
 }
