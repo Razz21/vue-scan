@@ -43,25 +43,23 @@ import { VueScanPlugin } from '@razz21/vue-scan';
 
 const app = createApp(App);
 
-const plugin = VueScanPlugin({
+app.use(VueScanPlugin, {
   // options
 });
-
-app.use(plugin);
 app.mount('#app');
 
 ```
 
 **Options**
 
-| Option              | Type       | Default                    | Description                                         |
-| ------------------- | ---------- | -------------------------- | --------------------------------------------------- |
+| Option              | Type       | Default              | Description                                         |
+| ------------------- | ---------- | -------------------- | --------------------------------------------------- |
 | `color`             | `string`   | `rgba(65, 184, 131)` | Highlight effect color                              |
-| `duration`          | `number`   | `600`                      | Highlight effect fade-out time in milliseconds      |
-| `enabled`           | `boolean`  | `true`                     | Enable or disable the plugin globally               |
-| `logToConsole`      | `boolean`  | `false`                    | Log component debug information to the console      |
-| `excludeComponents` | `string[]` | `[]`                       | Array of component names to exclude from tracking   |
-| `includeComponents` | `string[]` | `[]`                       | If provided, only track components with these names |
+| `duration`          | `number`   | `600`                | Highlight effect fade-out time in milliseconds      |
+| `enabled`           | `boolean`  | `true`               | Enable or disable the plugin globally               |
+| `logToConsole`      | `boolean`  | `false`              | Log component debug information to the console      |
+| `excludeComponents` | `string[]` | `[]`                 | Array of component names to exclude from tracking   |
+| `includeComponents` | `string[]` | `[]`                 | If provided, only track components with these names |
 
 ## FAQ
 
@@ -72,6 +70,27 @@ Currently, `vue-scan` is designed for development build only. However, I may pla
 2. *What are supported Vue versions?*
 
 This tool is built and tested using Vue v3.5.13+. Some features may not work with older versions.
+
+## Known Issues
+
+1. Vite project can not find the worker file.
+
+```
+The file does not exist at "/node_modules/.vite/deps/assets/offscreen-canvas.worker-xxx.js" which is in the optimize deps directory. The dependency might be incompatible with the dep optimizer. Try adding it to `optimizeDeps.exclude`.
+```
+
+To resolve this issue, you can add the following config to your `vite.config.ts`:
+
+```ts
+// vite.config.ts
+
+defineConfig({
+  // other config options...
+  optimizeDeps: {
+    exclude: ['@razz21/vue-scan'],
+  },
+});
+```
 
 ## References and inspiration
 - [vue-devtool-flash-updates](https://github.com/yuichkun/vue-devtool-flash-updates) - A Vue DevTools plugin that flashes components when they update

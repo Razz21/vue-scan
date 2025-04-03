@@ -5,8 +5,8 @@ import App from './App.vue';
 
 const app = createApp(App);
 
-const plugin = VueScanPlugin();
-
-app.use(plugin);
+app.use(VueScanPlugin, {
+  // options
+});
 
 app.mount('#app');
