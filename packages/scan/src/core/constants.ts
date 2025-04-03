@@ -2,7 +2,7 @@ import type { Options } from './types';
 
 export const defaultOptions: Options = {
   duration: 600,
-  color: 'rgba(65, 184, 131, 0.35)', // Vue green color
+  color: 'rgba(65, 184, 131)', // Vue green color
   enabled: true,
   includeComponents: [],
   excludeComponents: [],

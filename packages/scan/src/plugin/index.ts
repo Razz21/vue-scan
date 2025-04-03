@@ -1,13 +1,32 @@
-import { cleanupCanvas, initializeCanvas } from '@/canvas';
+import { VueScanCanvas } from '@/canvas';
 import { DevToolsHooks, defaultOptions } from '@/core/constants';
 import { createDevToolsHook } from '@/core/hook';
-import { componentStore } from '@/core/store';
+import { VueScanInstrumentation } from '@/core/instrumentation';
+import { VueScanStore } from '@/core/store';
 import type { Options } from '@/core/types';
 import { getComponentName } from '@/core/utils';
 import { logger } from '@/utils/logger';
-import { type Plugin, getCurrentInstance, nextTick } from 'vue';
+import { type Plugin, getCurrentInstance } from 'vue';
 
 // -----------------------------------
+
+function initCanvasContainer() {
+  const canvasContainer = document.createElement('div');
+  canvasContainer.id = 'vue-scan-container';
+  canvasContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 99999;
+  `;
+  document.body.appendChild(canvasContainer);
+
+  return canvasContainer;
+}
+
 createDevToolsHook();
 
 const VueScanPlugin: Plugin<Partial<Options>> = {
@@ -17,22 +36,27 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
     if (!options.enabled) {
       return;
     }
+
     logger.setOptions({ enabled: options.logToConsole });
 
-    let hook = window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
-
+    const canvasContainer = initCanvasContainer();
+    const canvas = new VueScanCanvas(canvasContainer, options);
+    const componentStore = new VueScanStore();
+    const instrumentation = new VueScanInstrumentation(options, componentStore, canvas);
+    const hook = window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
     if (!hook) {
       logger.error('__VUE_DEVTOOLS_GLOBAL_HOOK__ not available');
+      instrumentation.clear();
       return;
     }
 
     hook.on(DevToolsHooks.COMPONENT_ADDED, (_app, _uid, _parentUid, component) => {
-      componentStore.markActive(component);
+      requestIdleCallback(async () => await instrumentation.track(component));
       logger.log('COMPONENT_ADDED', getComponentName(component));
     });
 
     hook.on(DevToolsHooks.COMPONENT_UPDATED, (_app, _uid, _parentUid, component) => {
-      componentStore.markActive(component);
+      requestIdleCallback(async () => await instrumentation.track(component));
       logger.log('COMPONENT_UPDATED', getComponentName(component));
     });
 
@@ -40,32 +64,31 @@ const VueScanPlugin: Plugin<Partial<Options>> = {
       /*
        * This hook may not be called at all. Fallbacking to mixin -> beforeUnmount()
        */
-      componentStore.delete(uid);
+      requestIdleCallback(() => instrumentation.delete(uid), { timeout: 1000 });
       logger.log('COMPONENT_REMOVED', getComponentName(component));
     });
 
     hook.on(DevToolsHooks.APP_UNMOUNT, (_app) => {
-      if (options.logToConsole) logger.log('APP_UNMOUNT');
+      logger.log('APP_UNMOUNT');
     });
 
     app.mixin({
       beforeUnmount() {
         // TODO: hook up into global event
         const instance = getCurrentInstance();
-        componentStore.delete(instance.uid);
-
-        logger.log('COMPONENT_REMOVED', getComponentName(instance));
+        requestIdleCallback(() => instrumentation.delete(instance.uid), { timeout: 1000 });
       },
     });
 
-    nextTick(() => {
-      initializeCanvas(options);
-    });
+    setInterval(() => {
+      requestIdleCallback(() => instrumentation.garbageCollectElements());
+    }, 5000);
+
     /*
      * onUnmount is available from Vue 3.5.0
      */
     app.onUnmount?.(() => {
-      cleanupCanvas();
+      instrumentation.clear();
     });
   },
 };
