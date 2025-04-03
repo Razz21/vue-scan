@@ -1,5 +1,11 @@
 # @razz21/vue-scan
 
+## 0.1.3
+
+### Patch Changes
+
+- c5ca2be: [Fixed] Web Worker can not be resolved
+
 ## 0.1.2
 
 ### Patch Changes
