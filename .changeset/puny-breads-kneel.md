@@ -2,4 +2,4 @@
 "@razz21/vue-scan": patch
 ---
 
-Updated plugin config
+- Implemented OffscreenCanvas with Web Worker support.
