@@ -1,5 +1,17 @@
 # @razz21/vue-scan
 
+## 0.1.3
+
+### Patch Changes
+
+- c5ca2be: [Fixed] Web Worker can not be resolved
+
+## 0.1.2
+
+### Patch Changes
+
+- 4fc29aa: - Implemented OffscreenCanvas with Web Worker support.
+
 ## 0.1.1
 
 ### Patch Changes
