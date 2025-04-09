@@ -20,7 +20,7 @@
 </template>
 
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import HiddenTile from "./HiddenTile.vue";
 import TileItem from "./TileItem.vue";
