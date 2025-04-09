@@ -1,3 +1,3 @@
-import VueScanPlugin from './plugin';
+import VueScanPlugin from './vue/plugin';
 
 export { VueScanPlugin };

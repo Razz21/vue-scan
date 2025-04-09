@@ -21,15 +21,21 @@ export default defineConfig({
     target: 'esnext',
     sourcemap: true,
     lib: {
-      entry: [resolve(__dirname, 'src/index.ts')],
+      entry: {
+        index: resolve(__dirname, './src/index.ts'),
+        nuxt: resolve(__dirname, './src/nuxt/module.ts'),
+        plugin: resolve(__dirname, './src/nuxt/plugin.ts'),
+      },
       name: 'VueScan',
-      fileName: (format) => `index.${format === 'es' ? 'js' : 'min.js'}`,
+      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'min.js'}`,
     },
     rollupOptions: {
-      external: ['vue'],
+      external: ['vue', 'nuxt', 'nuxt/app', 'nuxt/schema', '@nuxt/kit'],
       output: {
+        preserveModules: true,
         globals: {
           vue: 'Vue',
+          nuxt: 'Nuxt',
         },
       },
     },
