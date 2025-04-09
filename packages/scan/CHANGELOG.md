@@ -1,5 +1,11 @@
 # @razz21/vue-scan
 
+## 0.1.4
+
+### Patch Changes
+
+- b88e1ab: Nuxt 3 module
+
 ## 0.1.3
 
 ### Patch Changes
