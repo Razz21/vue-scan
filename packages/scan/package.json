@@ -33,6 +33,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.min.js"
+    },
+    "./nuxt": {
+      "types": "./dist/nuxt.d.ts",
+      "import": "./dist/nuxt.js",
+      "require": "./dist/nuxt.min.js"
     }
   },
   "scripts": {
@@ -40,9 +45,12 @@
     "build": "vite build"
   },
   "devDependencies": {
+    "@nuxt/kit": "^3.15.0",
+    "nuxt": "*",
     "vue": "*"
   },
   "peerDependencies": {
+    "nuxt": "^3.15.0",
     "vue": "^3.5.0"
   }
 }
