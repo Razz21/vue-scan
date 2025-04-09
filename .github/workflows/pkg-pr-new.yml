@@ -12,7 +12,6 @@ on:
       - "packages/**"
     branches:
       - develop
-      - main
 
 jobs:
   build:
