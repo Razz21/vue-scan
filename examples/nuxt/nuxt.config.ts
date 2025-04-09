@@ -10,7 +10,6 @@ export default defineNuxtConfig({
   ],
 
   vueScan: {
-    enabled: true,
-    logToConsole: true,
+    // options
   },
 });
