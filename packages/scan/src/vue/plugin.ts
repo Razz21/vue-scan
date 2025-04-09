@@ -1,4 +1,5 @@
 import { VueScanCanvas } from '@/canvas';
+import { initCanvasContainer } from '@/canvas/render';
 import { DevToolsHooks, defaultOptions } from '@/core/constants';
 import { createDevToolsHook } from '@/core/hook';
 import { VueScanInstrumentation } from '@/core/instrumentation';
@@ -9,23 +10,6 @@ import { logger } from '@/utils/logger';
 import { type Plugin, getCurrentInstance } from 'vue';
 
 // -----------------------------------
-
-function initCanvasContainer() {
-  const canvasContainer = document.createElement('div');
-  canvasContainer.id = 'vue-scan-container';
-  canvasContainer.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 99999;
-  `;
-  document.body.appendChild(canvasContainer);
-
-  return canvasContainer;
-}
 
 createDevToolsHook();
 

@@ -23,7 +23,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["vite/client"]
+    "types": ["vite/client", "@nuxt/kit"]
   },
   "include": ["src"],
   "exclude": ["dist", "node_modules", "src/**/*.d.ts"]

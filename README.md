@@ -5,7 +5,7 @@
 
 # vue-scan
 
-![GitHub Release](https://img.shields.io/github/v/release/Razz21/vue-scan)
+![NPM Version](https://img.shields.io/npm/v/%40razz21%2Fvue-scan?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2F%40razz21%2Fvue-scan)
 ![GitHub License](https://img.shields.io/github/license/Razz21/vue-scan)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Razz21/vue-scan/ci.yml)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/Razz21/vue-scan)
@@ -48,6 +48,19 @@ app.use(VueScanPlugin, {
 });
 app.mount('#app');
 
+```
+
+### Nuxt 3 Module
+
+```ts
+// nuxt.config.ts
+
+export default defineNuxtConfig({
+  modules: ['@razz21/vue-scan/nuxt'],
+  vueScan: {
+    // options
+  },
+});
 ```
 
 **Options**

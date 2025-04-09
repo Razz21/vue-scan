@@ -71,6 +71,23 @@ export function drawRect({
   ctx.fillStyle = `rgba(${color},${Math.min(opacity + 0.2, 0.6)})`;
   ctx.fillRect(left, top - textHeight, width, textHeight);
 
-  ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`
+  ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
   ctx.fillText(title, left + 4, top - 4);
+}
+
+export function initCanvasContainer() {
+  const canvasContainer = document.createElement('div');
+  canvasContainer.id = 'vue-scan-container';
+  canvasContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 99999;
+  `;
+  document.body.appendChild(canvasContainer);
+
+  return canvasContainer;
 }

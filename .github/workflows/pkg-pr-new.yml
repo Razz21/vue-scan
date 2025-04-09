@@ -1,18 +1,17 @@
 name: Publish Develop to Pkg-Pr-New
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "packages/**"
-    branches:
-      - develop
+  # push:
+  #   paths:
+  #     - "packages/**"
+  #   branches:
+  #     - develop
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/**"
     branches:
       - develop
-      - main
 
 jobs:
   build:
