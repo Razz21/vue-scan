@@ -13,7 +13,7 @@
     "@nuxtjs/tailwindcss": "6.13.2",
     "@pinia/nuxt": "0.10.1",
     "@razz21/vue-scan": "^0.1.4",
-    "nuxt": "^3.16.2",
+    "nuxt": "^3.17.1",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
